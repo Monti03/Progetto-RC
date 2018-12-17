@@ -1,6 +1,6 @@
 <html>
     <script>
-        var ws = new WebSocket('ws://localhost:8080/ws/'); //per quando lavoro con docker -> localhost:8080 = nginx, /ws/ viene reindirizzato al server sulla porta per creare un ws diretto
+        var ws = new WebSocket('ws://localhost:40510'); //per quando lavoro con docker -> localhost:8080 = nginx, /ws/ viene reindirizzato al server sulla porta per creare un ws diretto
         // event emmited when connected
         ws.onopen = function () {
             console.log('websocket is connected ...')
@@ -14,6 +14,10 @@
             //document.getElementById("input").value = d +" "+ ev.data 
             addToList(ev.data)
         }
+
+        setInterval(function(){ //mando un messaggio ogni 4 secondi per non far chiudere il ws
+            ws.send("")    
+        }, 4000);
 
         function mySend(){
             var nameValue = document.getElementById("from").value;

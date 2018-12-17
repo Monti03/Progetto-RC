@@ -12,7 +12,7 @@ var appCode = obj.appCode;
 
 
 var bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false }));  //should parse to JSON results from requests automatically
 
 
 function getLongLat(res){
@@ -39,11 +39,6 @@ function cosaCercoVicinoPartenza(res, cosaCerchi){
     return urlPostoCercato
 }
 
-app.post('/posto', function(req,res){
-    console.log(req.body.from)
-    res.send("ok")
-})
-
 app.post('/', function(request, response){
     //var reqJS = JSON.parse(request)
     var indPartenza =  request.body.from.replace(" ","+") //il client dovrà fare una post con due campi -> indirizzo e cerco
@@ -52,8 +47,8 @@ app.post('/', function(request, response){
     /* var indPartenza = "via+battistini"
     var cosaCerchi = "MC" */
 
-    var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+indPartenza
-    var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
+    var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+indPartenza //URL per avere le coordinate dell'indirizzo di partenza
+    //var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
 
     /* var arrivo =requestPromise(urlPostoCercato) //questo deve dipendere dalla partenza in urlPostoCercato ?at=41.9590222,12.4116381
     .then(res => JSON.parse(res))
@@ -67,8 +62,8 @@ app.post('/', function(request, response){
     Promise.all([partenza])
     .then(function(part){
         var urlArrivo = cosaCercoVicinoPartenza(part,cosaCerchi)
-        var transito = requestPromise(urlArrivo)
-        .then(resArrivo => JSON.parse(resArrivo).results[0])
+        var destinazione = requestPromise(urlArrivo)
+        .then(resArrivo => JSON.parse(resArrivo).results[0]) // potrebbe restituire più destinazioni quindi prendiamo la prima (la piu vicina) 
         .then(function(arrivo){//resArrivo => console.log(resArrivo))//urlAssumeValore(resArrivo,part))
             console.log("arrivo :"+arrivo)
             console.log("part: "+part)
