@@ -24,18 +24,24 @@ function getLongLat(res){
 }
 
 function urlAssumeValore(partenza, arrivo){ //tmpTot contiene due risultati di promesse diversi -> il primo un json con latitudine e longitudine, il secondo con tutte le corrispondenze del dato cercato, per questo è trattato in maniera diversa
-    console.log("qua ->"+partenza[0].lati+" // "+ arrivo[0])
+    console.log("qua ->"+partenza.lati+" // "+ arrivo[0])
     //var url = "https://transit.api.here.com/v3/route.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+arrivo[0]+","+arrivo[1]+"&time=2018-11-19T07%3A30%3A00"
-    var url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza[0].lati+","+partenza[0].long+"&waypoint1=geo!"+arrivo[0]+","+arrivo[1]+"&mode=fastest;publicTransport&combineChange=true"
+    var url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+arrivo[0]+","+arrivo[1]+"&mode=fastest;publicTransport&combineChange=true"
     console.log(url)
     return url
 }
 
 function cosaCercoVicinoPartenza(res, cosaCerchi){
     console.log(res)
-    var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at="+res[0].lati+","+res[0].long+"&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
+    var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at="+res.lati+","+res.long+"&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
     console.log(urlPostoCercato)
     return urlPostoCercato
+}
+
+function errorFunction(err, response, i){
+    console.log("err: \n"+err+"\n\n")
+    response.sendfile("./error.html")
+    //TODO creare una pagina d errore
 }
 
 app.post('/posto', function(req,res){
@@ -52,19 +58,22 @@ app.post('/node', function(request, response){
     var cosaCerchi = "MC" */
 
     var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+indPartenza
-    var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
+    //var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
 
     /* var arrivo =requestPromise(urlPostoCercato) //questo deve dipendere dalla partenza in urlPostoCercato ?at=41.9590222,12.4116381
     .then(res => JSON.parse(res))
     .catch(err => console.log(err+"\n\narrivo")) */
 
+    //var partenza = requestPromise(urlPart)
+    //.then(res => getLongLat(res))//1
+    //.catch(err =>errorFunction(err, response)) 
+
+
+    //Promise.all([partenza])
     var partenza = requestPromise(urlPart)
-    .then(res => getLongLat(res))//1
-    .catch(err => console.log(err+"\n\nerr"))
-
-
-    Promise.all([partenza])
+    .then(res => getLongLat(res))
     .then(function(part){
+        console.log("part:"+part+"\n\n")
         var urlArrivo = cosaCercoVicinoPartenza(part,cosaCerchi)
         var destinazione = requestPromise(urlArrivo)
         .then(resArrivo => JSON.parse(resArrivo).results[0])// potrebbe restituire più destinazioni quindi prendiamo la prima (la piu vicina) 
@@ -98,27 +107,22 @@ app.post('/node', function(request, response){
                 }
                 catch(e){}
                 response.send(htmlFist+tot+htmlSecond)
+                return
             })
-            .catch(err => console.log(err+"\nerr"))
-            
-
+            .catch(err =>errorFunction(err, response,1))
         })
-        .catch(err => console.log(err +"\nerrrore"))
+        .catch(err =>errorFunction(err, response,2))
     })
+    .catch(err => errorFunction(err, response,3))
     /*
     1 -> calcolo lat e lon di partenza
     2 -> trovo posto vicino alla partenza
     3 -> calcolo strada 
     */
-
 });
 
 app.listen(PORTA)
 var roba = [] //ci sono tutti i ws attivi, quelli chiusi li tolgo al prossimo msg
-
-app.get("/webapp/", function(req,res){
-    res.send("ciao");
-})
 
 var WebSocketServer = require('ws').Server,
   	wss = new WebSocketServer({port: 40510})
@@ -145,7 +149,7 @@ var WebSocketServer = require('ws').Server,
 			}
   		})
 })
-console.log("listening on 8081")
+console.log("listening on %s",PORTA)
 
 var htmlFist = "<html>"
 +"<script>"
@@ -185,3 +189,4 @@ var htmlSecond = "<div style=\"overflow-y: scroll; height:200px;\">"
 +"</form>"
 +"</body>"
 +"</html>"
+
