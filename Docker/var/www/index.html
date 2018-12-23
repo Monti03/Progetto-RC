@@ -4,14 +4,18 @@
 <title>Page Title</title>
 </head>
 <body>
-<form action="http://localhost:8080/node" method="post">
+Fill the form with the departure and arrival address and choose your mean of transport:
+<form action="http://localhost:8080/node" method="POST">
   from:  
-  <input type="text" name="from" value="GIGI">
+  <input type="text" name="from" value="Via del cottanello">
   <br>
   to: 
-  <input type="text" name="to" value="GIGI">
+  <input type="text" name="to" value="via ariosto">
   <br>
   <input type="submit" value="Submit">
+
+  <label><input type="radio" name="facilities" value="car">Car</label>
+  <label><input type="radio" name="facilities" value="publicT">Public Transports</label>
 </form>
 </body>
 </html>

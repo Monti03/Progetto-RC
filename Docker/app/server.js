@@ -14,7 +14,7 @@ var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));//should parse to JSON results from requests automatically
 
 
-function getLongLat(res){
+function getCoordinates(res){
     var body =JSON.parse(res).Response.View[0].Result[0].Location.DisplayPosition
     var latitude = body.Latitude
     var longitude = body.Longitude
@@ -23,19 +23,34 @@ function getLongLat(res){
     return tmp
 }
 
-function urlAssumeValore(partenza, arrivo){ //tmpTot contiene due risultati di promesse diversi -> il primo un json con latitudine e longitudine, il secondo con tutte le corrispondenze del dato cercato, per questo è trattato in maniera diversa
-    console.log("qua ->"+partenza.lati+" // "+ arrivo[0])
-    //var url = "https://transit.api.here.com/v3/route.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+arrivo[0]+","+arrivo[1]+"&time=2018-11-19T07%3A30%3A00"
-    var url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+arrivo[0]+","+arrivo[1]+"&mode=fastest;publicTransport&combineChange=true"
-    console.log(url)
+function fabricFinalURL(partenza, destination,facilities){ //tmpTot contiene due risultati di promesse diversi -> il primo un json con latitudine e longitudine, il secondo con tutte le corrispondenze del dato cercato, per questo è trattato in maniera diversa
+    //console.log("qua ->"+partenza.lati+" // "+ destination[0])
+    //var url = "https://transit.api.here.com/v3/route.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+destination[0]+","+destination[1]+"&time=2018-11-19T07%3A30%3A00"
+    
+    var url;
+    if (facilities == "car"){
+        if (facilities == "fpublicT") {
+            console.log("Error in selecting checkboxes");
+            //do shutdown
+        }
+        url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+destination[0]+","+destination[1]+"&mode=fastest;car;traffic:disabled"
+
+    }
+    else if (facilities == "publicT"){
+        url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+destination[0]+","+destination[1]+"&mode=fastest;publicTransport&combineChange=true"
+    }
+    else {
+        console.log("Error in selecting checkboxes");
+    }
+    
     return url
 }
 
-function cosaCercoVicinoPartenza(res, cosaCerchi){
-    console.log(res)
-    var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at="+res.lati+","+res.long+"&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
-    console.log(urlPostoCercato)
-    return urlPostoCercato
+function getNearestDestination(res, desiredDestination){
+    //console.log(res)
+    var destinationURL = "https://places.cit.api.here.com/places/v1/autosuggest?at="+res.lati+","+res.long+"&q="+desiredDestination+"&app_id="+appId+"&app_code="+appCode
+    //console.log(destination)
+    return destinationURL
 }
 
 function errorFunction(err, response, i){
@@ -44,48 +59,23 @@ function errorFunction(err, response, i){
     //TODO creare una pagina d errore
 }
 
-app.post('/posto', function(req,res){
-    console.log(req.body.from)
-    res.send("ok")
-})
-
-app.post('/node', function(request, response){
-    //var reqJS = JSON.parse(request)
-    var indPartenza =  request.body.from.replace(" ","+") //il client dovrà fare una post con due campi -> indirizzo e cerco
-    var cosaCerchi = request.body.to.replace(" ","+")
-
-    /* var indPartenza = "via+battistini"
-    var cosaCerchi = "MC" */
-
-    var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+indPartenza
-    //var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
-
-    /* var arrivo =requestPromise(urlPostoCercato) //questo deve dipendere dalla partenza in urlPostoCercato ?at=41.9590222,12.4116381
-    .then(res => JSON.parse(res))
-    .catch(err => console.log(err+"\n\narrivo")) */
-
-    //var partenza = requestPromise(urlPart)
-    //.then(res => getLongLat(res))//1
-    //.catch(err =>errorFunction(err, response)) 
-
-
+function routing(departureAddress,desiredDestination,facilities,response){
+    var departureURL = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+departureAddress
     //Promise.all([partenza])
-    var partenza = requestPromise(urlPart)
-    .then(res => getLongLat(res))
-    .then(function(part){
-        console.log("part:"+part+"\n\n")
-        var urlArrivo = cosaCercoVicinoPartenza(part,cosaCerchi)
-        var destinazione = requestPromise(urlArrivo)
-        .then(resArrivo => JSON.parse(resArrivo).results[0])// potrebbe restituire più destinazioni quindi prendiamo la prima (la piu vicina) 
-        .then(function(arrivo){//resArrivo => console.log(resArrivo))//urlAssumeValore(resArrivo,part))
-            console.log("arrivo :"+arrivo)
-            console.log("part: "+part)
+    requestPromise(departureURL)
+    .then(res => getCoordinates(res))
+    .then(function(departure){
+        
+        var destinationURL = getNearestDestination(departure,desiredDestination)
+        requestPromise(destinationURL)
+        .then(destinations => JSON.parse(destinations).results[0])// might return more destinations, we'll take the nearest (the first)
+        .then(function(destination){//destinations => console.log(destinations))//fabricFinalURL(destinations,part))
+            //console.log("destination :"+destination)
 
-            var url = urlAssumeValore(part, arrivo.position)
-            requestPromise(url)
+            var finalURL = fabricFinalURL(departure, destination.position,facilities)
+            requestPromise(finalURL)
             .then(function(res){
 
-                console.log(res)
                 var percorsoJSON = JSON.parse(res)
                 /* console.log(percorsoJSON.response+"\n1")
                 console.log(percorsoJSON.response+"\n12")
@@ -106,7 +96,7 @@ app.post('/node', function(request, response){
                     }
                 }
                 catch(e){}
-                response.send(htmlFist+tot+htmlSecond)
+                response.send(firstHtml+tot+secondHtml)
                 return
             })
             .catch(err =>errorFunction(err, response,1))
@@ -114,6 +104,32 @@ app.post('/node', function(request, response){
         .catch(err =>errorFunction(err, response,2))
     })
     .catch(err => errorFunction(err, response,3))
+
+}
+
+app.post('/node', function(request, response){
+    //var reqJS = JSON.parse(request)
+    var facilities = request.body.facilities;
+    var departureAddress =  request.body.from.replace(" ","+") //il client dovrà fare una post con due campi -> indirizzo e cerco
+    var desiredDestination = request.body.to.replace(" ","+")
+
+    routing(departureAddress,desiredDestination,facilities,response);
+
+    /* var departureAddress = "via+battistini"
+    var desiredDestination = "MC" */
+
+    //var destination = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+desiredDestination+"&app_id="+appId+"&app_code="+appCode
+
+    /* var destination =requestPromise(destination) //questo deve dipendere dalla partenza in destination ?at=41.9590222,12.4116381
+    .then(res => JSON.parse(res))
+    .catch(err => console.log(err+"\n\ndestination")) */
+
+    //var partenza = requestPromise(departureURL)
+    //.then(res => getLongLat(res))//1
+    //.catch(err =>errorFunction(err, response)) 
+
+
+    
     /*
     1 -> calcolo lat e lon di partenza
     2 -> trovo posto vicino alla partenza
@@ -151,28 +167,28 @@ var WebSocketServer = require('ws').Server,
 })
 console.log("listening on %s",PORTA)
 
-var htmlFist = "<html>"
-+"<script>"
-	+"var ws = new WebSocket('ws://localhost:8080/ws/');"
-	+"ws.onopen = function () {\n"
-		+"console.log('websocket is connected ...');\n"
-	+"}\n" 
-	+"ws.onmessage = function (ev) {\n"
-	+	"console.log(ev);\n"
-		+"addToList(ev.data);\n"
-	+"}\n"
-	+"function mySend(){\n"
-		+"var nameValue = document.getElementById('from').value;\n"
-		+"try{"
-			+"document.getElementById('from').value = '';\n"
-			+"ws.send(nameValue);\n"
-		+"}catch(e){\n ws = new WebSocket('ws://localhost:8080/ws/');\n"
-			+"ws.send(nameValue);}\n"	
-	+"}\n"
-+"</script>"
-+"<body>"
+var firstHtml = "<html>\n"+
+"<script>\n"+
+"	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
+"	ws.onopen = function () {\n"+
+"		console.log('websocket is connected ...');\n"+
+"	}\n"+
+"	ws.onmessage = function (ev) {\n"+
+"	console.log(ev);\n"+
+"	addToList(ev.data);\n"+
+"	}\n"+
+"	function mySend(){\n"+
+"		var nameValue = document.getElementById('from').value;\n"+
+"		try{\n"+
+"			document.getElementById('from').value = '';\n"+
+"			ws.send(nameValue);\n"+
+"		}catch(e){\n ws = new WebSocket('ws://localhost:8080/ws/');\n"+
+"			ws.send(nameValue);}	\n"+
+"	}\n"+
+"</script>\n"+
+"<body>\n";
 
-var htmlSecond = "<div style=\"overflow-y: scroll; height:200px;\">"
+var secondHtml = "<div style=\"overflow-y: scroll; height:200px;\">"
 	+"<ul id=\"myList\"></ul>"
 	+"<script>"
 		+"function addToList(msg) {\n"
@@ -184,7 +200,7 @@ var htmlSecond = "<div style=\"overflow-y: scroll; height:200px;\">"
 	+"</script>"
 +"</div>"
 +"<form class=\"chat\" action=\"JavaScript:mySend();\">"
-+"	<input type=\"text\" name=\"from\" id=\"from\" value=\"GIGI\">"
++"	<input type=\"text\" name=\"from\" id=\"from\" value=\"clickToSend\">"
 +"	<input type=\"submit\" value=\"Submit\">"
 +"</form>"
 +"</body>"
