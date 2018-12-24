@@ -1,21 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
-</head>
-<body>
-Fill the form with the departure and arrival address and choose your mean of transport:
-<form action="http://localhost:8080/node" method="POST">
-  from:  
-  <input type="text" name="from" value="Via del cottanello">
-  <br>
-  to: 
-  <input type="text" name="to" value="via ariosto">
-  <br>
-  <input type="submit" value="Submit">
+	
+	<title>Choose Route</title>
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
 
-  <label><input type="radio" name="facilities" value="car">Car</label>
-  <label><input type="radio" name="facilities" value="publicT">Public Transports</label>
-</form>
+	<style>
+		
+		form#Route ol li label {
+            background:none no-repeat left 50%;
+            line-height: 20px;
+            padding: 0 0 0 15px;
+            width: auto;
+        }
+		form#Route ol li {
+			padding: 10px;
+		}
+
+</style>
+	
+</head>
+
+<body>
+
+	<div class="container-contact100">
+		<div class="wrap-contact100">
+			<form class="contact100-form validate-form" id="Route" method="post" action="http://localhost:8080/node">
+				<span class="contact100-form-title">
+					Insert Your Route
+				</span>
+
+				<label class="label-input100" for="from">Enter your route</label>
+				<div class="wrap-input100 rs1-wrap-input100 validate-input" data-validate="Type departure">
+					<input id="from" class="input100" type="text" name="from" placeholder="From...">
+					<span class="focus-input100"></span>
+				</div>
+				<div class="wrap-input100 rs2-wrap-input100 validate-input" data-validate="Type destination">
+					<input class="input100" type="text" name="to" placeholder="To...">
+					<span class="focus-input100"></span>
+				</div>
+
+				<label class="label-input100" for="transport">Chosen transport</label>
+				<div class="wrap-input100 validate-input">
+					<ol id="transport" name="transport">
+						<li>
+							<input id="public" type="radio" name="facilities" value="publicT" checked>
+							<label for="public">&nbspPublic Transport</label>
+						</li>
+						<br>
+						<li>
+							<input id="car" type="radio" name="facilities" value="car">
+							<label for="car">&nbspCar</label>
+						</li>
+					</ol>
+				</div>
+
+				<div class="container-contact100-form-btn">
+					<button class="contact100-form-btn" name="Check"> 
+						Find Route
+					</button>
+				</div>
+			</form>
+
+			<div class="contact100-more flex-col-c-m" style="background-image: url('images/viaggio.jpg');"> </div>
+		</div>
+	</div>
+
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="js/main.js"></script>
+
 </body>
 </html>
