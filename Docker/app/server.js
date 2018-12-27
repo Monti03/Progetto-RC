@@ -25,7 +25,7 @@ function getCoordinates(res){
 
 function fabricFinalURL(partenza, destination,facilities){ //tmpTot contiene due risultati di promesse diversi -> il primo un json con latitudine e longitudine, il secondo con tutte le corrispondenze del dato cercato, per questo è trattato in maniera diversa
     //console.log("qua ->"+partenza.lati+" // "+ destination[0])
-    //var url = "https://transit.api.here.com/v3/route.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+destination[0]+","+destination[1]+"&time=2018-11-19T07%3A30%3A00"
+    //var url = "https://transit.api.here.com/v3/route.json?app_id="+appId+"&app_code=appCode&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+destination[0]+","+destination[1]+"&time=2018-11-19T07%3A30%3A00"
     
     var url;
     if (facilities == "car"){
@@ -60,7 +60,7 @@ function errorFunction(err, response, i){
 }
 
 function routing(departureAddress,desiredDestination,facilities,response){
-    var departureURL = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+departureAddress
+    var departureURL = "https://geocoder.api.here.com/6.2/geocode.json?app_id="+appId+"&app_code="+appCode+"&searchtext="+departureAddress
     //Promise.all([partenza])
     requestPromise(departureURL)
     .then(res => getCoordinates(res))
@@ -82,7 +82,7 @@ function routing(departureAddress,desiredDestination,facilities,response){
                 console.log(percorsoJSON.response.route[0]+"\n13")
                 console.log(percorsoJSON.response.route[0]+"\n14")
                 console.log(percorsoJSON.response.route[0].leg[0].maneuver+"\n15") */
-
+                console.log(percorsoJSON.response.route[0])
                 var maneuver = percorsoJSON.response.route[0].leg[0].maneuver
                 var str = '' 
                 var tot = ''
@@ -96,7 +96,7 @@ function routing(departureAddress,desiredDestination,facilities,response){
                     }
                 }
                 catch(e){}
-                response.send(firstHtml+tot+secondHtml)
+                response.send(fistHtml+tot+secondHtml)
                 return
             })
             .catch(err =>errorFunction(err, response,1))
@@ -167,7 +167,7 @@ var WebSocketServer = require('ws').Server,
 })
 console.log("listening on %s",PORTA)
 
-var firstHtml = "<html>\n"+
+var fistHtml = "<html>\n"+
 "<script>\n"+
 "	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
 "	ws.onopen = function () {\n"+

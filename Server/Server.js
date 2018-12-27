@@ -26,7 +26,7 @@ function getLongLat(res){
 
 function urlAssumeValore(partenza, arrivo){ //tmpTot contiene due risultati di promesse diversi -> il primo un json con latitudine e longitudine, il secondo con tutte le corrispondenze del dato cercato, per questo è trattato in maniera diversa
     console.log("qua ->"+partenza[0].lati+" // "+ arrivo[0])
-    //var url = "https://transit.api.here.com/v3/route.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+arrivo[0]+","+arrivo[1]+"&time=2018-11-19T07%3A30%3A00"
+    //var url = "https://transit.api.here.com/v3/route.json?app_id="+appId+"&app_code="+appCode+"&routing=all&dep="+partenza[0].lati+","+partenza[0].long+"&arr="+arrivo[0]+","+arrivo[1]+"&time=2018-11-19T07%3A30%3A00"
     var url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza[0].lati+","+partenza[0].long+"&waypoint1=geo!"+arrivo[0]+","+arrivo[1]+"&mode=fastest;publicTransport&combineChange=true"
     console.log(url)
     return url
@@ -47,7 +47,7 @@ app.post('/', function(request, response){
     /* var indPartenza = "via+battistini"
     var cosaCerchi = "MC" */
 
-    var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+indPartenza //URL per avere le coordinate dell'indirizzo di partenza
+    var urlPart = "https://geocoder.api.here.com/6.2/geocode.json?app_id="+appId+"&app_code="+appCode+"&searchtext="+indPartenza //URL per avere le coordinate dell'indirizzo di partenza
     //var urlPostoCercato = "https://places.cit.api.here.com/places/v1/autosuggest?at=41.9590222,12.4116381&q="+cosaCerchi+"&app_id="+appId+"&app_code="+appCode
 
     /* var arrivo =requestPromise(urlPostoCercato) //questo deve dipendere dalla partenza in urlPostoCercato ?at=41.9590222,12.4116381

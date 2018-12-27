@@ -12,7 +12,6 @@ var request = require('request')
 var Twitter = require('./twitter');
 var extend = require('deep-extend');
 var app = express();
-var VERSION = '1.7.1'
 
 var fs = require('fs');
 
@@ -28,10 +27,10 @@ function consumer() {
         _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8080/sessions/callback", "HMAC-SHA1");
 }
 
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(logger({ path: "log/express.log"}));
-app.use(cookieParser());
+//app.use(logger({ path: "log/express.log"}));
+//app.use(cookieParser());
 app.use(session({ secret: "very secret", resave: false, saveUninitialized: true}));
 
 app.get('/', function(req, res){
@@ -45,8 +44,8 @@ app.get('/sessions/connect', function(req, res){
             res.status(500).send("Error getting OAuth request token : " +error.toString());
         } else {
             req.session.oauthRequestToken = oauthToken;
-            console.log(oauthToken)
-            console.log(oauthTokenSecret)
+            console.log("1oauthToken "+oauthToken)
+            console.log("1oauthTokenSecret"+oauthTokenSecret)
             req.session.oauthRequestTokenSecret = oauthTokenSecret;
             res.redirect("https://twitter.com/oauth/authorize?oauth_token="+req.session.oauthRequestToken);
         }
@@ -54,25 +53,14 @@ app.get('/sessions/connect', function(req, res){
 });
 
 app.get('/sessions/callback', function(req, res){
-    console.log(req)
+    //console.log(req)
     var i = 0;
-    var oauthRequestToken = ""
-    var oauthRequestTokenSecret = ""
-    for(var key in req.sessionStore.sessions){ //perchè ha nome variabile -> faccio un for su tutti i campi del json (è solo 1 per questo pezzo)
-        var reqS = JSON.parse(req.sessionStore.sessions[key])
-        for(key2 in reqS){                      //qui ho tre campi -> primo non server, altri 2 contengono oauthRequestToken e oauthRequestTokenSecret
-            //console.log(reqS[key2])
-            if(i == 1)
-                oauthRequestToken = reqS[key2]
-            if(i == 2)
-                oauthRequestTokenSecret = reqS[key2]
-            i = i+1
-        }
-    }
-    console.log(">>"+oauthRequestToken);
-    console.log(">>"+oauthRequestTokenSecret);
-    console.log(">>"+req.query.oauth_verifier);
-    consumer().getOAuthAccessToken(oauthRequestToken, oauthRequestTokenSecret, req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
+    
+    var oauthRequestToken = req.query.oauth_token
+    
+    console.log(">>2oauthRequestToken "+oauthRequestToken);
+    console.log(">>2oauth_verifier "+req.query.oauth_verifier);
+    consumer().getOAuthAccessToken(oauthRequestToken, "", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
         if (error) {
             console.log(error)
             res.status(500).send("Error getting OAuth access token : " + (error) + "["+oauthAccessToken+"]"+ "["+oauthAccessTokenSecret+"]"+ "["+(results)+"]");
@@ -88,29 +76,17 @@ app.get('/sessions/callback', function(req, res){
                 access_token_secret: oauthAccessTokenSecret
             });
               
-            client.post('statuses/update', {status: 'prova Node server'},  function(error, tweet, response) {
+            client.post({status: 'prova Node server'+new Date().getTime()},  function(error, tweet, response) {
                 if(error){ 
-                    console.log(error);
+                    console.log(error+"\n\n");
                     res.send("NO")
                 }
                 else{
+                    console.log("ok\n\n");
                     res.send("OK")
                 }
             }); 
-            
-            //questo qua sotto non funziona 
-            /* consumer().post(url, oauthAccessToken, oauthAccessTokenSecret, status, '', function (error, data, response) {
-                if (!error && response.statusCode == 200) {
-                    data = JSON.parse(data);
-                    twitterScreenName = data["screen_name"]
 
-                    res.send("OK "+twitterScreenName)
-                } else {
-                    console.log(error,response,data)
-                    //console.log("data is %j", data);
-                    res.send("NO")
-                }
-            }); */
         }
     });
 });
