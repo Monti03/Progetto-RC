@@ -12,22 +12,21 @@ app.use(bodyParser.urlencoded({ extended: false }));//should parse to JSON resul
 var obj = JSON.parse(fs.readFileSync('./here_credentials.json', 'utf8'));
 var appId = obj.appId;
 var appCode = obj.appCode; 
-var appId = "CVAaK2gXnpxbTGXCXfEF"
-var appCode = "QRcbeua36nMsGyaZoGAiTQ"
+
 function getCoordinates(res){
     var body =JSON.parse(res).Response.View[0].Result[0].Location.DisplayPosition
     var latitude = body.Latitude
     var longitude = body.Longitude
     tmp = {lati: latitude, long:longitude}
-    //console.log(tmp)
+    
     return tmp
 }
 
 app.get('/routing/public/partenza=:Start&arrivo=:Destination',function(req,response){
-   // res.send(req.params.appCode+" partenza: "+req.params.Start)
+  
    var departureAddress =  req.params.Start.replace(" ","+") 
     var desiredDestination = req.params.Destination.replace(" ","+")
- //    res.send(departureAddress)
+
     var departureURL = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+departureAddress
      requestPromise(departureURL)
     .then(res => getCoordinates(res))
@@ -49,11 +48,11 @@ app.get('/routing/public/partenza=:Start&arrivo=:Destination',function(req,respo
 
 
 app.get('/routing/car/partenza=:Start&arrivo=:Destination',function(req,response){
-    // res.send(req.params.appCode+" partenza: "+req.params.Start)
+    
     var departureAddress =  req.params.Start.replace(" ","+") 
      var desiredDestination = req.params.Destination.replace(" ","+")
      
-  //    res.send(departureAddress)
+
      var departureURL = "https://geocoder.api.here.com/6.2/geocode.json?app_id=455tjCCjwc8IGDYu0VTH&app_code=5x3bNvjnmP-P_oGSnnLAfw&searchtext="+departureAddress
       requestPromise(departureURL)
      .then(res => getCoordinates(res))
