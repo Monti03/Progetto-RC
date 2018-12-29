@@ -1,17 +1,93 @@
-
 var requestPromise = require('request-promise')
 var express = require('express')
-var app =  express()
+var bodyParser = require("body-parser");
+var fs = require('fs');
+var oauth = require('oauth');
+var Twitter = require('./twitter');
 
 var PORTA = 8081
+var users = []
 
-var fs = require('fs');
+var app =  express()
 var obj = JSON.parse(fs.readFileSync('./here_credentials.json', 'utf8'));
 var appId = obj.appId;
 var appCode = obj.appCode; 
-
-var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));//should parse to JSON results from requests automatically
+app.use(bodyParser.json());
+
+var obj = JSON.parse(fs.readFileSync('./twitter_credentials.json', 'utf8'));
+var _twitterConsumerKey = obj._twitterConsumerKey;
+var _twitterConsumerSecret = obj._twitterConsumerSecret; 
+
+class Obj{
+    constructor(oauthToken,textToPost){
+        this.textToPost = textToPost
+        this.oauthToken = oauthToken
+    }
+}
+
+function consumer() {
+    return new oauth.OAuth(
+        "https://twitter.com/oauth/request_token", "https://twitter.com/oauth/access_token",
+        _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8082/sessions/callback", "HMAC-SHA1");
+}
+
+
+
+app.get('/sessions/connect', function(req, res){
+    consumer().getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
+        if (error) {
+            console.log(error)
+            res.status(500).send("Error getting OAuth request token : " +error.toString());
+        } else {
+
+            console.log("\nIl Token oauth nella connect è "+oauthToken);
+            var textToPost = "Hola uncle monty python this will be printed for sure, damn!"
+
+            users.push(new Obj(oauthToken,textToPost))
+            res.redirect("https://twitter.com/oauth/authorize?oauth_token="+oauthToken);
+        }
+    });
+});
+
+app.get('/sessions/callback', function(req, res){
+    
+    var oauthRequestToken = req.query.oauth_token
+    var textToPost = "";
+    var i = 0
+    for (i = 0; i<users.length; i++){
+        if(users[i].oauthToken == oauthRequestToken){
+            textToPost = users[i].textToPost
+        }
+    }
+    
+    console.log("\nIl token oauth nella callback è: "+oauthRequestToken);
+    consumer().getOAuthAccessToken(oauthRequestToken, "", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
+        if (error) {
+            console.log(error)
+            res.status(500).send("Error getting OAuth access token : " + (error) + "["+oauthAccessToken+"]"+ "["+oauthAccessTokenSecret+"]"+ "["+(results)+"]");
+        } else {
+            
+            var client = new Twitter({
+                consumer_key: _twitterConsumerKey,
+                consumer_secret: _twitterConsumerSecret,
+                access_token_key: oauthAccessToken,
+                access_token_secret: oauthAccessTokenSecret
+            });
+              
+            client.post({status: textToPost+" "+new Date().getTime()},  function(error, tweet, response) {
+                if(error){ 
+                    console.log(error+"\n\n");
+                }
+                else{
+                    console.log("\nPOSTED SUCCESSFULLY\n");
+                }
+            }); 
+
+        }
+    });
+});
+
 
 
 function getCoordinates(res){
@@ -95,7 +171,7 @@ function routing(departureAddress,desiredDestination,facilities,response){
                     }
                 }
                 catch(e){}
-                response.send(fistHtml+tot+secondHtml)
+                response.send(firstHtml+tot+secondHtml)
                 return
             })
             .catch(err =>errorFunction(err, response,1))
@@ -166,7 +242,7 @@ var WebSocketServer = require('ws').Server,
 })
 console.log("listening on %s",PORTA)
 
-var fistHtml = "<html>\n"+
+var firstHtml = "<html>\n"+
 "<script>\n"+
 "	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
 "	ws.onopen = function () {\n"+
