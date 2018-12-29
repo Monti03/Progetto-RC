@@ -55,8 +55,7 @@ function getNearestDestination(res, desiredDestination){
 
 function errorFunction(err, response, i){
     console.log("err: \n"+err+"\n\n")
-    response.sendfile("./error.html")
-    //TODO creare una pagina d errore
+    response.sendfile("./ErrorPage/error.html")
 }
 
 function routing(departureAddress,desiredDestination,facilities,response){
