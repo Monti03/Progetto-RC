@@ -31,15 +31,15 @@ class Obj{
 function consumer() {
     return new oauth.OAuth(
         "https://twitter.com/oauth/request_token", "https://twitter.com/oauth/access_token",
-        _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8081/sessions/callback", "HMAC-SHA1");
+        _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8080/sessions/callback", "HMAC-SHA1");
 }
 
 
 
 app.post('/sessions/connect', function(req, res){
 	console.log("ho ricevuto una richiesta")
-	var departure = req.body.departure
-	var destination = req.body.destination
+	var departure = req.body.departure.replace("+"," ")
+	var destination = req.body.destination.replace("+"," ")
     consumer().getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
         if (error) {
             console.log(error)
@@ -82,11 +82,11 @@ app.get('/sessions/callback', function(req, res){
             client.post({status: textToPost+" "+new Date().getTime()},  function(error, tweet, response) {
                 if(error){ 
                     console.log(error+"\n\n");
-			res.send("NO")
+                    errorFunction("errore nella post", res)
                 }
                 else{
                     console.log("\nPOSTED SUCCESSFULLY\n");
-		    res.send("OK")
+		            res.send(autoCloseHtml)
                 }
             }); 
 
@@ -176,12 +176,13 @@ function routing(departureAddress,desiredDestination,facilities,response){
                         tot = tot + "<br>"+ str.instruction
                     }
                 }
-                catch(e){}
-		console.log("destination = "+des)
-		 des = des.replace(" ","_")
-		 dep = dep.replace(" ","_")
-		
-                response.send(firstHtml+tot+secondHtml+dep+thirdHtml+des+fourthHtml)
+                catch(e){}  
+                if(facilities == "car"){
+                    response.send(firstHtmlCar+tot+secondHtmlCar+dep+thirdHtmlCar+des+fourthHtmlCar)
+                }
+                else{
+                    response.send(firstHtml+tot+secondHtml)
+                }
                 return
             })
             .catch(err =>errorFunction(err, response,1))
@@ -254,6 +255,28 @@ var WebSocketServer = require('ws').Server,
 })
 console.log("listening on %s",PORTA)
 
+var firstHtmlCar = "<html>\n"+"<body>\n";
+
+var secondHtmlCar = "<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\">"
++"	<input type=\"hidden\" name=\"departure\"  value=\"";
+
+var thirdHtmlCar = "\">"
++"      <input type=\"hidden\" name=\"destination\"  value=\"";
+
+
+var fourthHtmlCar = "\">"
++"	<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">"
++"</form>"
++"</body>"
++"</html>";
+
+var autoCloseHtml = "<!doctype html><html><head><script>\n"
++"window.onload = function load() {+\n"
++"window.open('', '_self', '');\n"
+  +"window.close();\n"
++"};\n"
++"</script></head><body></body></html>"
+
 var firstHtml = "<html>\n"+
 "<script>\n"+
 "	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
@@ -290,18 +313,5 @@ var secondHtml = "<div style=\"overflow-y: scroll; height:200px;\">"
 +"	<input type=\"text\" name=\"from\" id=\"from\" value=\"clickToSend\">"
 +"	<input type=\"submit\" value=\"Submit\">"
 +"</form>"
-+"<form action=\"http://localhost:8081/sessions/connect\" method =\"post\" target = \"_blank\">"
-+"	<input type=\"hidden\" name=\"departure\"  value=\ ";
-
-var thirdHtml = ">"
-+"      <input type=\"hidden\" name=\"destination\"  value=\ ";
-
-
-var fourthHtml = ">"
-+"	<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">"
-+"</form>"
 +"</body>"
-+"</html>";
-
-
-
++"</html>"
