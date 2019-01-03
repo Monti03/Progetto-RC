@@ -28,10 +28,10 @@ class Obj{
     }
 }
 
-function consumer() {
+function consumer(facilities) {
     return new oauth.OAuth(
         "https://twitter.com/oauth/request_token", "https://twitter.com/oauth/access_token",
-        _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8080/sessions/callback", "HMAC-SHA1");
+        _twitterConsumerKey, _twitterConsumerSecret, "1.0A", "http://127.0.0.1:8080/sessions/callback?facilities=" + facilities, "HMAC-SHA1");
 }
 
 
@@ -40,12 +40,11 @@ app.post('/sessions/connect', function(req, res){
 	console.log("ho ricevuto una richiesta")
 	var departure = req.body.departure.replace("+"," ")
 	var destination = req.body.destination.replace("+"," ")
-    consumer().getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
+    consumer("car").getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
         if (error) {
             console.log(error)
             res.status(500).send("Error getting OAuth request token : " +error.toString());
         } else {
-
             console.log("\nIl Token oauth nella connect è "+oauthToken);
             var textToPost = "Parto da "+departure+" e arrivo a "+destination+" a qualcuno serve un passaggio?"
             users.push(new Obj(oauthToken,textToPost))
@@ -54,23 +53,38 @@ app.post('/sessions/connect', function(req, res){
     });
 });
 
+app.get('/sessions/connect', function(req, res){
+	console.log("ho ricevuto una richiesta")
+    consumer("publicT").getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
+        if (error) {
+            console.log(error)
+            res.status(500).send("Error getting OAuth request token : " +error.toString());
+        } else {
+            console.log("\nIl Token oauth nella connect è "+oauthToken + "\n");
+            res.redirect("https://twitter.com/oauth/authorize?oauth_token="+oauthToken);
+        }
+    });
+});
+
 app.get('/sessions/callback', function(req, res){
     
     var oauthRequestToken = req.query.oauth_token
-    var textToPost = "";
-    var i = 0
-    for (i = 0; i<users.length; i++){
-        if(users[i].oauthToken == oauthRequestToken){
-            textToPost = users[i].textToPost
-        }
-    }
+    var facilities = req.query.facilities;
     
     console.log("\nIl token oauth nella callback è: "+oauthRequestToken);
-    consumer().getOAuthAccessToken(oauthRequestToken, "", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
+    consumer(facilities).getOAuthAccessToken(oauthRequestToken, "", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
         if (error) {
             console.log(error)
             res.status(500).send("Error getting OAuth access token : " + (error) + "["+oauthAccessToken+"]"+ "["+oauthAccessTokenSecret+"]"+ "["+(results)+"]");
-        } else {
+        } else if(facilities == "car") {
+
+            var textToPost = "";
+            var i = 0
+            for (i = 0; i<users.length; i++){
+                if(users[i].oauthToken == oauthRequestToken){
+                    textToPost = users[i].textToPost
+                }
+            }
             
             var client = new Twitter({
                 consumer_key: _twitterConsumerKey,
@@ -90,6 +104,23 @@ app.get('/sessions/callback', function(req, res){
                 }
             }); 
 
+        }
+        else if(facilities == "publicT") {
+            consumer(facilities).get("https://api.twitter.com/1.1/account/verify_credentials.json", oauthAccessToken, oauthAccessTokenSecret, function (error, data, response) {
+                if (error) {
+                    console.log(error)
+                    res.status(500).send("Error getting twitter screen name")
+                }
+                else {
+                    console.log("data is %j\n", data)
+                    data = JSON.parse(data)
+                    res.send(autoCloseHtml)
+                    //Manca la parte in cui bisogna associare lo screen_name alla ws
+                }
+            });
+        }
+        else {
+            console.log("Error in passing parameters\n");
         }
     });
 });
@@ -296,9 +327,11 @@ var firstHtml = "<html>\n"+
 "			ws.send(nameValue);}	\n"+
 "	}\n"+
 "</script>\n"+
-"<body>\n";
+"<body>\n"
 
-var secondHtml = "<div style=\"overflow-y: scroll; height:200px;\">"
+var secondHtml = "<br>\n"
+    +"<a href='http://localhost:8080/sessions/connect' target=\"_blank\">accedi su twitter</a>\n"
+    +"<div style=\"overflow-y: scroll; height:200px;\">"
 	+"<ul id=\"myList\"></ul>"
 	+"<script>"
 		+"function addToList(msg) {\n"
