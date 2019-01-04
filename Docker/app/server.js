@@ -7,6 +7,7 @@ var Twitter = require('./twitter');
 
 var PORTA = 8081
 var users = []
+var array_id = []
 
 var app =  express()
 var obj = JSON.parse(fs.readFileSync('./here_credentials.json', 'utf8'));
@@ -25,6 +26,13 @@ class Obj{
     constructor(oauthToken,textToPost){
         this.textToPost = textToPost
         this.oauthToken = oauthToken
+    }
+}
+
+class Roba_record {
+    constructor(id, ws) {
+        this.id = id
+        this.ws = ws
     }
 }
 
@@ -54,13 +62,15 @@ app.post('/sessions/connect', function(req, res){
 });
 
 app.get('/sessions/connect', function(req, res){
-	console.log("ho ricevuto una richiesta")
+    console.log("ho ricevuto una richiesta")
+    var id = req.query.id
     consumer("publicT").getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret, results){
         if (error) {
             console.log(error)
             res.status(500).send("Error getting OAuth request token : " +error.toString());
         } else {
             console.log("\nIl Token oauth nella connect è "+oauthToken + "\n");
+            array_id.push(new Obj(oauthToken, id))
             res.redirect("https://twitter.com/oauth/authorize?oauth_token="+oauthToken);
         }
     });
@@ -114,8 +124,23 @@ app.get('/sessions/callback', function(req, res){
                 else {
                     console.log("data is %j\n", data)
                     data = JSON.parse(data)
+                    var id
+                    var i = 0
+                    for (i = 0; i<array_id.length; i++){
+                        if(array_id[i].oauthToken == oauthRequestToken){
+                            id = array_id[i].textToPost
+                            break;
+                        }
+                    }
+                    var lunghezzaVar = roba.length
+                    for(i = 0; i < lunghezzaVar; i++) {
+                        if(roba[i].id == parseInt(id)) {
+                            roba[i].id = data["screen_name"]
+                            roba[i].ws.send("[set id]" + roba[i].id)
+                            break;
+                        }
+                    }
                     res.send(autoCloseHtml)
-                    //Manca la parte in cui bisogna associare lo screen_name alla ws
                 }
             });
         }
@@ -258,29 +283,43 @@ app.post('/node', function(request, response){
 
 app.listen(PORTA)
 var roba = [] //ci sono tutti i ws attivi, quelli chiusi li tolgo al prossimo msg
+var last_id = 0;
 
 var WebSocketServer = require('ws').Server,
   	wss = new WebSocketServer({port: 40510})
 	wss.on('connection', function (ws) { //quando qualcuno si connette viene eseguita questa funzione e ws è il websocket relativo alla connessione
         console.log('connessione')
-		roba.push(ws)                       //roba è un vettore su cio tramite push inserisco ws 
+        roba.push(new Roba_record(last_id, ws))                 //roba è un vettore su cio tramite push inserisco ws
+        last_id = last_id + 1
   		ws.on('message', function (message) {//quando arriva un messaggio parte questa callback
 			console.log('received: %s', message)
 			if(message != ""){
-				//ws.send(`${new Date()}`)
-				var i = 0
-				var lunghezzaVar = roba.length //a quanti websocket devo mandare il messaggio (la chat è broadcast)
-				while(i<lunghezzaVar){
-					console.log(i +" "+ lunghezzaVar)
-					try{
-						roba[i].send(message)   //mando il messaggio ricevuto ad ognuno
-						i = i + 1
-					}
-					catch(e){ // se ws chiuso -> rimuovo dal vettore di ws -> devo ridurre la lunghezza e non updatare i
-						roba.splice(i, 1);  //rimuove il ws potenzialmente chiuso o crashato
-						lunghezzaVar = lunghezzaVar -1
-					}
-				}
+                if(message != "request id") {
+                    //ws.send(`${new Date()}`)
+                    var i = 0
+                    var lunghezzaVar = roba.length //a quanti websocket devo mandare il messaggio (la chat è broadcast)
+                    while(i<lunghezzaVar){
+                        console.log(i +" "+ lunghezzaVar)
+                        try{
+                            roba[i].ws.send(message)   //mando il messaggio ricevuto ad ognuno
+                            i = i + 1
+                        }
+                        catch(e){ // se ws chiuso -> rimuovo dal vettore di ws -> devo ridurre la lunghezza e non updatare i
+                            roba.splice(i, 1);  //rimuove il ws potenzialmente chiuso o crashato
+                            lunghezzaVar = lunghezzaVar -1
+                        }
+                    }
+                }
+                else {
+                    var i;
+                    var lunghezzaVar = roba.length
+                    for(i = 0; i < lunghezzaVar; i++) {
+                        if(roba[i].ws == ws) {
+                            ws.send("[set id]" + roba[i].id)
+                            break;
+                        }
+                    }
+                }
 			}
   		})
 })
@@ -310,16 +349,28 @@ var autoCloseHtml = "<!doctype html><html><head><script>\n"
 
 var firstHtml = "<html>\n"+
 "<script>\n"+
+"   var id;\n"+
 "	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
 "	ws.onopen = function () {\n"+
 "		console.log('websocket is connected ...');\n"+
+"       ws.send(\"request id\");\n"+
 "	}\n"+
 "	ws.onmessage = function (ev) {\n"+
-"	console.log(ev);\n"+
-"	addToList(ev.data);\n"+
+"	    console.log(ev);\n"+
+"       if(ev.data.includes(\"[set id]\")) {\n"+
+"           id = ev.data.substring(8);\n"+
+"           if(!isNaN(id)) document.getElementById('Link').setAttribute(\"href\", 'http://localhost:8080/sessions/connect?id=' + id);\n"+
+"       }\n"+
+"       else addToList(ev.data);\n"+	
 "	}\n"+
+"   setInterval(function(){\n"+
+"      ws.send('')\n"+    
+"   }, 60000);\n"+
 "	function mySend(){\n"+
-"		var nameValue = document.getElementById('from').value;\n"+
+"		var nameValue;\n"+
+"       if(isNaN(id)) nameValue = \"[\" + id + \"]\";\n"+
+"       else nameValue = \"[Unknown\" + id + \"]\";\n"+
+"       nameValue += document.getElementById('from').value;\n"+
 "		try{\n"+
 "			document.getElementById('from').value = '';\n"+
 "			ws.send(nameValue);\n"+
@@ -330,7 +381,7 @@ var firstHtml = "<html>\n"+
 "<body>\n"
 
 var secondHtml = "<br>\n"
-    +"<a href='http://localhost:8080/sessions/connect' target=\"_blank\">accedi su twitter</a>\n"
+    +"<a id=\"Link\" target=\"_blank\">accedi su twitter</a>\n"
     +"<div style=\"overflow-y: scroll; height:200px;\">"
 	+"<ul id=\"myList\"></ul>"
 	+"<script>"
