@@ -171,7 +171,7 @@ function fabricFinalURL(partenza, destination,facilities){ //tmpTot contiene due
             console.log("Error in selecting checkboxes");
             //do shutdown
         }
-        url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+destination[0]+","+destination[1]+"&mode=fastest;car;traffic:disabled"
+        url = "https://route.api.here.com/routing/7.2/calculateroute.json?app_id="+appId+"&app_code="+appCode+"&waypoint0=geo!"+partenza.lati+","+partenza.long+"&waypoint1=geo!"+destination[0]+","+destination[1]+"&mode=fastest;car&representation=display&maneuverattributes=direction,action&routeattributes=waypoints,summary,shape,legs"
 
     }
     else if (facilities == "publicT"){
@@ -234,7 +234,19 @@ function routing(departureAddress,desiredDestination,facilities,response){
                 }
                 catch(e){}  
                 if(facilities == "car"){
-                    response.send(firstHtmlCar+tot+secondHtmlCar+dep+thirdHtmlCar+des+fourthHtmlCar)
+                    //response.send(firstHtmlCar+tot+secondHtmlCar+dep+thirdHtmlCar+des+fourthHtmlCar)
+                    var str1 = JSON.stringify(percorsoJSON.response.route[0]).split("'")
+                    tmp1 = ""
+                    for(k1 in str1){
+                        tmp1 = tmp1 + "\\'" +str1[k1]
+                    }
+                    console.log(tmp1)
+                    var str = tmp1.substr(2).split("\\\"")//JSON.stringify(percorsoJSON.response.route[0]).split("\\\"")
+                    tmp = ""
+                    for (k in str){
+                        tmp = tmp + "\\'" + str[k]
+                    }
+                    response.send(prova+"'"+tmp.substr(2)+"'"+prova2+secondHtmlCar+dep+thirdHtmlCar+des+fourthHtmlCar)
                 }
                 else{
                     response.send(firstHtml+tot+secondHtml)
@@ -327,18 +339,18 @@ console.log("listening on %s",PORTA)
 
 var firstHtmlCar = "<html>\n"+"<body>\n";
 
-var secondHtmlCar = "<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\">"
-+"	<input type=\"hidden\" name=\"departure\"  value=\"";
+var secondHtmlCar = "<div style=\"position:absolute; width:49%; left:51%; height:10%; bottom: 0; background:inherit\"\>\n<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\">"
++"<input type=\"hidden\" name=\"departure\"  value=\"";
 
 var thirdHtmlCar = "\">"
-+"      <input type=\"hidden\" name=\"destination\"  value=\"";
++"<input type=\"hidden\" name=\"destination\"  value=\"";
 
 
-var fourthHtmlCar = "\">"
-+"	<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">"
-+"</form>"
-+"</body>"
-+"</html>";
+var fourthHtmlCar = "\">\n"
++"<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">"
++"</form>\n</div>\n"
++"</body>\n</html>"
+
 
 var autoCloseHtml = "<!doctype html><html><head><script>\n"
 +"window.onload = function load() {+\n"
@@ -399,3 +411,445 @@ var secondHtml = "<br>\n"
 +"</form>"
 +"</body>"
 +"</html>"
+
+var prova = "<!DOCTYPE html>\n"+
+"<html>\n"+
+"<head>\n"+
+"<meta name=\"viewport\" content=\"initial-scale=1.0, width=device-width\" />\n"+
+"<link rel=\"stylesheet\" type=\"text/css\" href=\"https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1542186754\" />\n"+
+"<script type=\"text/javascript\" src=\"https://js.api.here.com/v3/3.0/mapsjs-core.js\"></script>\n"+
+"<script type=\"text/javascript\" src=\"https://js.api.here.com/v3/3.0/mapsjs-service.js\"></script>\n"+
+"<script type=\"text/javascript\" src=\"https://js.api.here.com/v3/3.0/mapsjs-ui.js\"></script>\n"+
+"<script type=\"text/javascript\" src=\"https://js.api.here.com/v3/3.0/mapsjs-mapevents.js\"></script>\n"+
+"<style type=\"text/css\">\n"+
+".directions li span.arrow {\n"+
+"  display:inline-block;\n"+
+"  min-width:28px;\n"+
+"  min-height:28px;\n"+
+"  background-position:0px;\n"+
+"  background-image: url(\"../img/arrows.png\");\n"+
+"  position:relative;\n"+
+"  top:8px;\n"+
+"}\n"+
+".directions li span.depart  {\n"+
+"  background-position:-28px;\n"+
+"}\n"+
+".directions li span.rightUTurn  {\n"+
+"  background-position:-56px;\n"+
+"}\n"+
+".directions li span.leftUTurn  {\n"+
+"  background-position:-84px;\n"+
+"}\n"+
+".directions li span.rightFork  {\n"+
+"  background-position:-112px;\n"+
+"}\n"+
+".directions li span.leftFork  {\n"+
+"  background-position:-140px;\n"+
+"}\n"+
+".directions li span.rightMerge  {\n"+
+"  background-position:-112px;\n"+
+"}\n"+
+".directions li span.leftMerge  {\n"+
+"  background-position:-140px;\n"+
+"}\n"+
+".directions li span.slightRightTurn  {\n"+
+"  background-position:-168px;\n"+
+"}\n"+
+".directions li span.slightLeftTurn{\n"+
+"  background-position:-196px;\n"+
+"}\n"+
+".directions li span.rightTurn  {\n"+
+"  background-position:-224px;\n"+
+"}\n"+
+".directions li span.leftTurn{\n"+
+"  background-position:-252px;\n"+
+"}\n"+
+".directions li span.sharpRightTurn  {\n"+
+"  background-position:-280px;\n"+
+"}\n"+
+".directions li span.sharpLeftTurn{\n"+
+"  background-position:-308px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit1 {\n"+
+"  background-position:-616px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit2 {\n"+
+"  background-position:-644px;\n"+
+"}\n"+
+"\n"+
+".directions li span.rightRoundaboutExit3 {\n"+
+"  background-position:-672px;\n"+
+"}\n"+
+"\n"+
+".directions li span.rightRoundaboutExit4 {\n"+
+"  background-position:-700px;\n"+
+"}\n"+
+"\n"+
+".directions li span.rightRoundaboutPass {\n"+
+"  background-position:-700px;\n"+
+"}\n"+
+"\n"+
+".directions li span.rightRoundaboutExit5 {\n"+
+"  background-position:-728px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit6 {\n"+
+"  background-position:-756px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit7 {\n"+
+"  background-position:-784px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit8 {\n"+
+"  background-position:-812px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit9 {\n"+
+"  background-position:-840px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit10 {\n"+
+"  background-position:-868px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit11 {\n"+
+"  background-position:896px;\n"+
+"}\n"+
+".directions li span.rightRoundaboutExit12 {\n"+
+"  background-position:924px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit1  {\n"+
+"  background-position:-952px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit2  {\n"+
+"  background-position:-980px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit3  {\n"+
+"  background-position:-1008px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit4  {\n"+
+"  background-position:-1036px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutPass {\n"+
+"  background-position:1036px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit5  {\n"+
+"  background-position:-1064px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit6  {\n"+
+"  background-position:-1092px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit7  {\n"+
+"  background-position:-1120px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit8  {\n"+
+"  background-position:-1148px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit9  {\n"+
+"  background-position:-1176px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit10  {\n"+
+"  background-position:-1204px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit11  {\n"+
+"  background-position:-1232px;\n"+
+"}\n"+
+".directions li span.leftRoundaboutExit12  {\n"+
+"  background-position:-1260px;\n"+
+"}\n"+
+".directions li span.arrive  {\n"+
+"  background-position:-1288px;\n"+
+"}\n"+
+".directions li span.leftRamp  {\n"+
+"  background-position:-392px;\n"+
+"}\n"+
+".directions li span.rightRamp  {\n"+
+"  background-position:-420px;\n"+
+"}\n"+
+".directions li span.leftExit  {\n"+
+"  background-position:-448px;\n"+
+"}\n"+
+".directions li span.rightExit  {\n"+
+"  background-position:-476px;\n"+
+"}\n"+
+"\n"+
+".directions li span.ferry  {\n"+
+"  background-position:-1316px;\n"+
+"}\n"+
+"</style>\n"+
+"</head>\n"+
+"<body>\n"+
+"\n"+
+"  <div id=\"map\" style=\"position:absolute; width:49%; height:100%; background:grey\" ></div>\n"+
+"  <div id=\"panel\" style=\"position:absolute; width:49%; left:51%; height:90%; background:inherit\" ></div>\n"+
+"\n"+
+"  <script  type=\"text/javascript\" charset=\"UTF-8\" >\n"+
+"    \n"+
+"\n"+
+"/**\n"+
+" * Calculates and displays a car route from the Brandenburg Gate in the centre of Berlin\n"+
+" * to Friedrichstraße Railway Station.\n"+
+" *\n"+
+" * A full list of available request parameters can be found in the Routing API documentation.\n"+
+" * see:  http://developer.here.com/rest-apis/documentation/routing/topics/resource-calculate-route.html\n"+
+" *\n"+
+" * @param   {H.service.Platform} platform    A stub class to access HERE services\n"+
+" */\n"+
+"function calculateRouteFromAtoB (platform) {\n"+
+"  var router = platform.getRoutingService(),\n"+
+"    routeRequestParams = {\n"+
+"      mode: 'fastest;car',\n"+
+"      representation: 'display',\n"+
+"      routeattributes : 'waypoints,summary,shape,legs',\n"+
+"      maneuverattributes: 'direction,action',\n"+
+"      waypoint0: '41.9344529,12.374119699999937', // FROM\n"+
+"      waypoint1: '41.9132337,12.4084705'  // TO\n"+
+"    };\n"+
+"\n"+
+"\n"+
+"  router.calculateRoute(\n"+
+"    routeRequestParams,\n"+
+"    onSuccess,\n"+
+"    onError\n"+
+"  );\n"+
+"}\n"+
+"/**\n"+
+" * This function will be called once the Routing REST API provides a response\n"+
+" * @param  {Object} result          A JSONP object representing the calculated route\n"+
+" *\n"+
+" * see: http://developer.here.com/rest-apis/documentation/routing/topics/resource-type-calculate-route.html\n"+
+" */\n"+
+"function onSuccess(result) {\n"+
+"  var route1 = "//result.response.route[0];\n"+
+
+var prova2 =";\n   route = JSON.parse(route1);\n"+
+"  addRouteShapeToMap(route);\n"+
+"  addManueversToMap(route);\n"+
+"\n"+
+"  addWaypointsToPanel(route.waypoint);\n"+
+"  addManueversToPanel(route);\n"+
+"  //addSummaryToPanel(route.summary);\n"+
+"  // ... etc.\n"+
+"}\n"+
+"\n"+
+"/**\n"+
+" * This function will be called if a communication error occurs during the JSON-P request\n"+
+" * @param  {Object} error  The error message received.\n"+
+" */\n"+
+"function onError(error) {\n"+
+"  alert('Ooops!');\n"+
+"}\n"+
+"\n"+
+"\n"+
+"\n"+
+"\n"+
+"/**\n"+
+" * Boilerplate map initialization code starts below:\n"+
+" */\n"+
+"\n"+
+"// set up containers for the map  + panel\n"+
+"var mapContainer = document.getElementById('map'),\n"+
+"  routeInstructionsContainer = document.getElementById('panel');\n"+
+"\n"+
+"//Step 1: initialize communication with the platform\n"+
+"var platform = new H.service.Platform({\n"+
+"  app_id: 'devportal-demo-20180625',\n"+
+"  app_code: '9v2BkviRwi9Ot26kp2IysQ',\n"+
+"  useHTTPS: true\n"+
+"});\n"+
+"var pixelRatio = window.devicePixelRatio || 1;\n"+
+"var defaultLayers = platform.createDefaultLayers({\n"+
+"  tileSize: pixelRatio === 1 ? 256 : 512,\n"+
+"  ppi: pixelRatio === 1 ? undefined : 320\n"+
+"});\n"+
+"\n"+
+"//Step 2: initialize a map - this map is centered over Berlin\n"+
+"var map = new H.Map(mapContainer,\n"+
+"  defaultLayers.normal.map,{\n"+
+"  center: {lat:52.5160, lng:13.3779},\n"+
+"  zoom: 13,\n"+
+"  pixelRatio: pixelRatio\n"+
+"});\n"+
+"\n"+
+"//Step 3: make the map interactive\n"+
+"// MapEvents enables the event system\n"+
+"// Behavior implements default interactions for pan/zoom (also on mobile touch environments)\n"+
+"var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));\n"+
+"\n"+
+"// Create the default UI components\n"+
+"var ui = H.ui.UI.createDefault(map, defaultLayers);\n"+
+"\n"+
+"// Hold a reference to any infobubble opened\n"+
+"var bubble;\n"+
+"\n"+
+"/**\n"+
+" * Opens/Closes a infobubble\n"+
+" * @param  {H.geo.Point} position     The location on the map.\n"+
+" * @param  {String} text              The contents of the infobubble.\n"+
+" */\n"+
+"function openBubble(position, text){\n"+
+" if(!bubble){\n"+
+"    bubble =  new H.ui.InfoBubble(\n"+
+"      position,\n"+
+"      // The FO property holds the province name.\n"+
+"      {content: text});\n"+
+"    ui.addBubble(bubble);\n"+
+"  } else {\n"+
+"    bubble.setPosition(position);\n"+
+"    bubble.setContent(text);\n"+
+"    bubble.open();\n"+
+"  }\n"+
+"}\n"+
+"\n"+
+"\n"+
+"/**\n"+
+" * Creates a H.map.Polyline from the shape of the route and adds it to the map.\n"+
+" * @param {Object} route A route as received from the H.service.RoutingService\n"+
+" */\n"+
+"function addRouteShapeToMap(route){\n"+
+"  var lineString = new H.geo.LineString(),\n"+
+"    routeShape = route.shape,\n"+
+"    polyline;\n"+
+"\n"+
+"  routeShape.forEach(function(point) {\n"+
+"    var parts = point.split(',');\n"+
+"    lineString.pushLatLngAlt(parts[0], parts[1]);\n"+
+"  });\n"+
+"\n"+
+"  polyline = new H.map.Polyline(lineString, {\n"+
+"    style: {\n"+
+"      lineWidth: 4,\n"+
+"      strokeColor: 'rgba(0, 128, 255, 0.7)'\n"+
+"    }\n"+
+"  });\n"+
+"  // Add the polyline to the map\n"+
+"  map.addObject(polyline);\n"+
+"  // And zoom to its bounding rectangle\n"+
+"  map.setViewBounds(polyline.getBounds(), true);\n"+
+"}\n"+
+"\n"+
+"\n"+
+"/**\n"+
+" * Creates a series of H.map.Marker points from the route and adds them to the map.\n"+
+" * @param {Object} route  A route as received from the H.service.RoutingService\n"+
+" */\n"+
+"function addManueversToMap(route){\n"+
+"  var svgMarkup = '<svg width=\"18\" height=\"18\"' +\n"+
+"    'xmlns=\"http://www.w3.org/2000/svg\">' +\n"+
+"    '<circle cx=\"8\" cy=\"8\" r=\"8\" ' +\n"+
+"      'fill=\"#1b468d\" stroke=\"white\" stroke-width=\"1\"  />' +\n"+
+"    '</svg>',\n"+
+"    dotIcon = new H.map.Icon(svgMarkup, {anchor: {x:8, y:8}}),\n"+
+"    group = new  H.map.Group(),\n"+
+"    i,\n"+
+"    j;\n"+
+"\n"+
+"  // Add a marker for each maneuver\n"+
+"  for (i = 0;  i < route.leg.length; i += 1) {\n"+
+"    for (j = 0;  j < route.leg[i].maneuver.length; j += 1) {\n"+
+"      // Get the next maneuver.\n"+
+"      maneuver = route.leg[i].maneuver[j];\n"+
+"      // Add a marker to the maneuvers group\n"+
+"      var marker =  new H.map.Marker({\n"+
+"        lat: maneuver.position.latitude,\n"+
+"        lng: maneuver.position.longitude} ,\n"+
+"        {icon: dotIcon});\n"+
+"      marker.instruction = maneuver.instruction;\n"+
+"      group.addObject(marker);\n"+
+"    }\n"+
+"  }\n"+
+"\n"+
+"  group.addEventListener('tap', function (evt) {\n"+
+"    map.setCenter(evt.target.getPosition());\n"+
+"    openBubble(\n"+
+"       evt.target.getPosition(), evt.target.instruction);\n"+
+"  }, false);\n"+
+"\n"+
+"  // Add the maneuvers group to the map\n"+
+"  map.addObject(group);\n"+
+"}\n"+
+"\n"+
+"\n"+
+"/**\n"+
+" * Creates a series of H.map.Marker points from the route and adds them to the map.\n"+
+" * @param {Object} route  A route as received from the H.service.RoutingService\n"+
+" */\n"+
+"function addWaypointsToPanel(waypoints){\n"+
+"\n"+
+"\n"+
+"\n"+
+"  var nodeH3 = document.createElement('h3'),\n"+
+"    waypointLabels = [],\n"+
+"    i;\n"+
+"\n"+
+"\n"+
+"   for (i = 0;  i < waypoints.length; i += 1) {\n"+
+"    waypointLabels.push(waypoints[i].label)\n"+
+"   }\n"+
+"\n"+
+"   nodeH3.textContent = waypointLabels.join(' - ');\n"+
+"\n"+
+"  routeInstructionsContainer.innerHTML = '';\n"+
+"  routeInstructionsContainer.appendChild(nodeH3);\n"+
+"}\n"+
+"\n"+
+"/**\n"+
+" * Creates a series of H.map.Marker points from the route and adds them to the map.\n"+
+" * @param {Object} route  A route as received from the H.service.RoutingService\n"+
+" */\n"+
+"function addSummaryToPanel(summary){\n"+
+"  var summaryDiv = document.createElement('div'),\n"+
+"   content = '';\n"+
+"   content += '<b>Total distance</b>: ' + summary.distance  + 'm. <br/>';\n"+
+"   content += '<b>Travel Time</b>: ' + summary.travelTime.toMMSS() + ' (in current traffic)';\n"+
+"\n"+
+"\n"+
+"  summaryDiv.style.fontSize = 'small';\n"+
+"  summaryDiv.style.marginLeft ='5%';\n"+
+"  summaryDiv.style.marginRight ='5%';\n"+
+"  summaryDiv.innerHTML = content;\n"+
+"  routeInstructionsContainer.appendChild(summaryDiv);\n"+
+"}\n"+
+"\n"+
+"/**\n"+
+" * Creates a series of H.map.Marker points from the route and adds them to the map.\n"+
+" * @param {Object} route  A route as received from the H.service.RoutingService\n"+
+" */\n"+
+"function addManueversToPanel(route){\n"+
+"\n"+
+"\n"+
+"\n"+
+"  var nodeOL = document.createElement('ol'),\n"+
+"    i,\n"+
+"    j;\n"+
+"\n"+
+"  nodeOL.style.fontSize = 'small';\n"+
+"  nodeOL.style.marginLeft ='5%';\n"+
+"  nodeOL.style.marginRight ='5%';\n"+
+"  nodeOL.className = 'directions';\n"+
+"\n"+
+"     // Add a marker for each maneuver\n"+
+"  for (i = 0;  i < route.leg.length; i += 1) {\n"+
+"    for (j = 0;  j < route.leg[i].maneuver.length; j += 1) {\n"+
+"      // Get the next maneuver.\n"+
+"      maneuver = route.leg[i].maneuver[j];\n"+
+"\n"+
+"      var li = document.createElement('li'),\n"+
+"        spanArrow = document.createElement('span'),\n"+
+"        spanInstruction = document.createElement('span');\n"+
+"\n"+
+"      spanArrow.className = 'arrow '  + maneuver.action;\n"+
+"      spanInstruction.innerHTML = maneuver.instruction;\n"+
+"      li.appendChild(spanArrow);\n"+
+"      li.appendChild(spanInstruction);\n"+
+"\n"+
+"      nodeOL.appendChild(li);\n"+
+"    }\n"+
+"  }\n"+
+"\n"+
+"  routeInstructionsContainer.appendChild(nodeOL);\n"+
+"}\n"+
+"\n"+
+"\n"+
+"Number.prototype.toMMSS = function () {\n"+
+"  return  Math.floor(this / 60)  +' minutes '+ (this % 60)  + ' seconds.';\n"+
+"}\n"+
+"\n"+
+"// Now use the map as required...\n"+
+"calculateRouteFromAtoB (platform);\n"+
+"  </script>\n"
