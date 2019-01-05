@@ -119,8 +119,7 @@ app.get('/sessions/callback', function(req, res){
                 if (error) {
                     console.log(error)
                     res.status(500).send("Error getting twitter screen name")
-                }
-                else {
+                } else {
                     console.log("data is %j\n", data)
                     data = JSON.parse(data)
                     var id
@@ -336,7 +335,7 @@ console.log("listening on %s",PORTA)
 
 var firstHtmlCar = "<html>\n"+"<body>\n";
 
-var secondHtmlCar = "<div style=\"position:absolute; width:49%; left:51%; height:10%; bottom: 0; background:inherit\"\>\n<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\">"
+var secondHtmlCar = "<div style=\"position:absolute; width:49%; left:51%; height:10%; bottom: 0; background:inherit\"\>\n<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\" onSubmit=\"getElementById('SUBMIT').setAttribute('disabled', 'disabled')\">\n"
 +"<input type=\"hidden\" name=\"departure\"  value=\"";
 
 var thirdHtmlCar = "\">"
@@ -344,7 +343,7 @@ var thirdHtmlCar = "\">"
 
 
 var fourthHtmlCar = "\">\n"
-+"<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">"
++"<input type=\"submit\" id =\"SUBMIT\" value=\"post su twitter\">\n"
 +"</form>\n</div>\n"
 +"</body>\n</html>"
 
