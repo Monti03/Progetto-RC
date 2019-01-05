@@ -114,8 +114,7 @@ app.get('/sessions/callback', function(req, res){
                 }
             }); 
 
-        }
-        else if(facilities == "publicT") {
+        } else if(facilities == "publicT") {
             consumer(facilities).get("https://api.twitter.com/1.1/account/verify_credentials.json", oauthAccessToken, oauthAccessTokenSecret, function (error, data, response) {
                 if (error) {
                     console.log(error)
@@ -143,8 +142,7 @@ app.get('/sessions/callback', function(req, res){
                     res.send(autoCloseHtml)
                 }
             });
-        }
-        else {
+        } else {
             console.log("Error in passing parameters\n");
         }
     });
@@ -321,8 +319,7 @@ var WebSocketServer = require('ws').Server,
                             lunghezzaVar = lunghezzaVar -1
                         }
                     }
-                }
-                else {
+                } else {
                     var i;
                     var lunghezzaVar = roba.length
                     for(i = 0; i < lunghezzaVar; i++) {
@@ -369,26 +366,29 @@ var firstHtml = "<html>\n"+
 "	}\n"+
 "	ws.onmessage = function (ev) {\n"+
 "	    console.log(ev);\n"+
-"       if(ev.data.includes(\"[set id]\")) {\n"+
+"       if(ev.data.startsWith(\"[set id]\")) {\n"+
 "           id = ev.data.substring(8);\n"+
 "           if(!isNaN(id)) document.getElementById('Link').setAttribute(\"href\", 'http://localhost:8080/sessions/connect?id=' + id);\n"+
 "       }\n"+
-"       else addToList(ev.data);\n"+	
+"       else addToList(ev.data, id);\n"+	
 "	}\n"+
 "   setInterval(function(){\n"+
 "      ws.send('')\n"+    
 "   }, 60000);\n"+
 "	function mySend(){\n"+
-"		var nameValue;\n"+
-"       if(isNaN(id)) nameValue = \"[\" + id + \"]\";\n"+
-"       else nameValue = \"[Unknown\" + id + \"]\";\n"+
-"       nameValue += document.getElementById('from').value;\n"+
-"		try{\n"+
-"			document.getElementById('from').value = '';\n"+
-"			ws.send(nameValue);\n"+
-"		}catch(e){\n ws = new WebSocket('ws://localhost:8080/ws/');\n"+
-"			ws.send(nameValue);}	\n"+
-"	}\n"+
+"       var value = document.getElementById('from').value;\n"+
+"       if(value != \"\") {\n"+
+"		    var nameValue;\n"+
+"           if(isNaN(id)) nameValue = \"[\" + id + \"]\";\n"+
+"           else nameValue = \"[Unknown\" + id + \"]\";\n"+
+"           nameValue += value;\n"+
+"		    try{\n"+
+"               document.getElementById('from').value = '';\n"+
+"			    ws.send(nameValue);\n"+
+"		    }catch(e){\n ws = new WebSocket('ws://localhost:8080/ws/');\n"+
+"			    ws.send(nameValue);}	\n"+
+"	    }\n"+
+"   }\n"+
 "</script>\n"+
 "<body>\n"
 
@@ -397,8 +397,12 @@ var secondHtml = "<br>\n"
     +"<div style=\"overflow-y: scroll; height:200px;\">"
 	+"<ul id=\"myList\"></ul>"
 	+"<script>"
-		+"function addToList(msg) {\n"
-			+"var node = document.createElement('LI');\n"
+		+"function addToList(msg, id) {\n"
+            +"var node = document.createElement('LI');\n"
+            +"var to_disc = 0;\n"
+            +"if(msg.startsWith(\"[\" + id + \"]\")) to_disc = id.length + 2;\n"
+            +"else if(msg.startsWith(\"[Unknown\" + id + \"]\")) to_disc = id.length + 9;\n"
+            +"if(to_disc > 0) msg = \"[You]\" + msg.slice(to_disc);\n"
 			+"var textnode = document.createTextNode(msg);\n"
 			+"node.appendChild(textnode);\n"
 			+"document.getElementById('myList').appendChild(node);\n"
