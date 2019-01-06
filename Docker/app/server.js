@@ -333,7 +333,6 @@ var WebSocketServer = require('ws').Server,
 })
 console.log("listening on %s",PORTA)
 
-var firstHtmlCar = "<html>\n"+"<body>\n";
 
 var secondHtmlCar = "<div style=\"position:absolute; width:49%; left:51%; height:10%; bottom: 0; background:inherit\"\>\n<form action=\"http://localhost:8080/sessions/connect\" method =\"post\" target = \"_blank\" onSubmit=\"getElementById('SUBMIT').setAttribute('disabled', 'disabled')\">\n"
 +"<input type=\"hidden\" name=\"departure\"  value=\"";
@@ -430,7 +429,6 @@ var prova = "<!DOCTYPE html>\n"+
 "  min-width:28px;\n"+
 "  min-height:28px;\n"+
 "  background-position:0px;\n"+
-"  background-image: url(\"../img/arrows.png\");\n"+
 "  position:relative;\n"+
 "  top:8px;\n"+
 "}\n"+
@@ -584,50 +582,17 @@ var prova = "<!DOCTYPE html>\n"+
 "  <script  type=\"text/javascript\" charset=\"UTF-8\" >\n"+
 "    \n"+
 "\n"+
-"/**\n"+
-" * Calculates and displays a car route from the Brandenburg Gate in the centre of Berlin\n"+
-" * to Friedrichstraße Railway Station.\n"+
-" *\n"+
-" * A full list of available request parameters can be found in the Routing API documentation.\n"+
-" * see:  http://developer.here.com/rest-apis/documentation/routing/topics/resource-calculate-route.html\n"+
-" *\n"+
-" * @param   {H.service.Platform} platform    A stub class to access HERE services\n"+
-" */\n"+
-"function calculateRouteFromAtoB (platform) {\n"+
-"  var router = platform.getRoutingService(),\n"+
-"    routeRequestParams = {\n"+
-"      mode: 'fastest;car',\n"+
-"      representation: 'display',\n"+
-"      routeattributes : 'waypoints,summary,shape,legs',\n"+
-"      maneuverattributes: 'direction,action',\n"+
-"      waypoint0: '41.9344529,12.374119699999937', // FROM\n"+
-"      waypoint1: '41.9132337,12.4084705'  // TO\n"+
-"    };\n"+
-"\n"+
-"\n"+
-"  router.calculateRoute(\n"+
-"    routeRequestParams,\n"+
-"    onSuccess,\n"+
-"    onError\n"+
-"  );\n"+
-"}\n"+
-"/**\n"+
-" * This function will be called once the Routing REST API provides a response\n"+
-" * @param  {Object} result          A JSONP object representing the calculated route\n"+
-" *\n"+
-" * see: http://developer.here.com/rest-apis/documentation/routing/topics/resource-type-calculate-route.html\n"+
-" */\n"+
-"function onSuccess(result) {\n"+
+"function onSuccess() {\n"+
 "  var route1 = "//result.response.route[0];\n"+
 
-var prova2 =";\n   route = JSON.parse(route1);\n"+
+var prova2 =";\n   try{route = JSON.parse(route1);\n"+
 "  addRouteShapeToMap(route);\n"+
 "  addManueversToMap(route);\n"+
 "\n"+
 "  addWaypointsToPanel(route.waypoint);\n"+
 "  addManueversToPanel(route);\n"+
 "  //addSummaryToPanel(route.summary);\n"+
-"  // ... etc.\n"+
+"}catch(e){onError(e)}"+
 "}\n"+
 "\n"+
 "/**\n"+
@@ -854,5 +819,5 @@ var prova2 =";\n   route = JSON.parse(route1);\n"+
 "}\n"+
 "\n"+
 "// Now use the map as required...\n"+
-"calculateRouteFromAtoB (platform);\n"+
+"onSuccess();\n"+
 "  </script>\n"

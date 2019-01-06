@@ -2,3 +2,4 @@ Server/here_credentials.json
 Server/Twitter/twitter_credentials.json
 Docker/app/here_credentials.json
 Docker/app/Twitter/twitter_credentials.json
+Docker/appApi/here_credentials.json

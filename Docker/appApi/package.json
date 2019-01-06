@@ -1,0 +1,20 @@
+{
+  "name": "2.-node",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node API_REST.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "file://node_modules/body-parser",
+    "concurrently": "^4.0.1",
+    "express": "^4.16.4",
+    "fs": "0.0.1-security",
+    "ip": "^1.1.5",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "ws": "^6.0.0"
+  }
+}

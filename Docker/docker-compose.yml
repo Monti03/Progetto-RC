@@ -22,6 +22,16 @@ services:
       - ./app/:/home/node/app
     command: "npm start"
   
+  nodeApi:
+    image: "node:8"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./appApi/:/home/node/app
+    command: "npm start"
+    
   ngix:
     image: "nginx"
     volumes:
