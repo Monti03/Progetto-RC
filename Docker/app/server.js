@@ -226,7 +226,17 @@ function routing(departureAddress,desiredDestination,facilities,response){
                         str = maneuver[i]
                         i = i + 1
                         //console.log(i+":\n\t"+str.instruction) 
-                        tot = tot + "<br>"+ str.instruction
+                        var transportIcon = ''
+                        if(str.instruction.indexOf("Metro") > -1) {
+                            transportIcon = '<i class="fas fa-subway"></i>'
+                        } else if(str.instruction.indexOf("train") > -1 || str.instruction.indexOf("rail") > -1) {
+                            transportIcon = '<i class="fas fa-train"></i>'
+                        } else if(str.instruction.indexOf("bus") > -1) {
+                            transportIcon = '<i class="fas fa-bus"></i>'
+                        } else {
+                            transportIcon = '<i class="fas fa-walking"></i>'
+                        }
+                        tot = tot + '<p>' + transportIcon +  '&#9' + str.instruction + '</p>' + '<hr>\n'
                     }
                 }
                 catch(e){}  
@@ -355,6 +365,9 @@ var autoCloseHtml = "<!doctype html><html><head><script>\n"
 +"</script></head><body></body></html>"
 
 var firstHtml = "<html>\n"+
+"<head>\n"+
+"<link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.6.3/css/all.css\" integrity=\"sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/\" crossorigin=\"anonymous\">\n"+
+"</head>\n"+
 "<script>\n"+
 "   var id;\n"+
 "	var ws = new WebSocket('ws://localhost:8080/ws/');\n"+
