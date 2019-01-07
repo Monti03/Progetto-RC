@@ -33,5 +33,5 @@ In base al tipo di trasporto scelto, l'utente ha a disposizione servizi diversi:
 - Trasporto Pubblico: l'utente ha a disposizione una chat broadcast per comunicare con gli altri utenti, intrattenersi nell'attesa dei mezzi e eventualmente avere informazioni ulteriori su ritardi o altro. In aggiunta, l'utente può scegliere di fare l'accesso a Twitter per identificarsi nella chat tramite il proprio username.   
 - Trasporto Privato: l'utente ha la possibilità di fare l'accesso a Twitter per condividere con i suoi followers i luoghi di partenza e destinazione del viaggio che sta intraprendendo, in modo tale da offrirsi per un servizio di car sharing.
 
-## Possibili Aggiornamenti futuri
-Introduzione di una mappa per fornire supporto visivo alle indicazioni stradali ricevute.
+## API REST
+L'Applicazione espone due API tramite le quali offre un servizio di mesh-up dei servizi offerti dalle API REST utilizzate. La documentazione relativa alle API è nel file API_documentation.md nella stessa cartella del README.md.
