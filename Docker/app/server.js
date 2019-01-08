@@ -103,7 +103,7 @@ app.get('/sessions/callback', function(req, res){
                 access_token_secret: oauthAccessTokenSecret
             });
               
-            client.post({status: textToPost+" "+new Date().getTime()},  function(error, tweet, response) {
+            client.post({status: textToPost },  function(error, tweet, response) {
                 if(error){ 
                     console.log(error+"\n\n");
                     errorFunction("errore nella post", res)
