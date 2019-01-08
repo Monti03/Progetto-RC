@@ -182,25 +182,9 @@ I file JSON ritornati saranno composti alla stessa maniera. Un esempio indicativ
 }
 
 In caso di errore invece, sarà ritornato un JSON di questo tipo:
-
-{
-  "_type": "ns2:RoutingServiceErrorType",
-  "type": "ApplicationError",
-  "subtype": "InvalidInputData",
-  "details": "Longitude is missing",
-  "additionalData": [
-    {
-      "key": "waypoint0",
-      "value": "0"
-    }
-  ],
-  "metaInfo": {
-    "timestamp": "2019-01-07T15:41:44Z",
-    "mapVersion": "8.30.92.151",
-    "moduleVersion": "7.2.201900-1265",
-    "interfaceVersion": "2.6.34",
-    "availableMapVersion": [
-      "8.30.92.151"
-    ]
-  }
-}
+{ "Info":
+        {"departure":MC,
+        "destination":via battistini,
+        "errorType":"destination not found"
+        }
+ }
