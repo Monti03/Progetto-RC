@@ -253,7 +253,7 @@ function routing(departureAddress,desiredDestination,facilities,response){
                     for (k in str){
                         tmp = tmp + "\\'" + str[k]
                     }
-                    response.send(prova+"'"+tmp.substr(2)+"'"+prova2+secondHtmlCar+dep+thirdHtmlCar+des+fourthHtmlCar)
+                    response.send(prova+"'"+tmp.substr(2)+"'"+prova2+secondHtmlCar+departureAddress+thirdHtmlCar+desiredDestination+fourthHtmlCar)
                 }
                 else{
                     response.send(firstHtml+tot+secondHtml)
@@ -271,8 +271,8 @@ function routing(departureAddress,desiredDestination,facilities,response){
 app.post('/node', function(request, response){
     //var reqJS = JSON.parse(request)
     var facilities = request.body.facilities;
-    dep = request.body.from
-    des = request.body.to
+    //dep = request.body.from
+    //des = request.body.to
     var departureAddress =  request.body.from.replace(" ","+") //il client dovrà fare una post con due campi -> indirizzo e cerco
     var desiredDestination = request.body.to.replace(" ","+")
 
