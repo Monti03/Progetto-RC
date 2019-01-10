@@ -43,7 +43,6 @@ function consumer(facilities) {
 }
 
 
-
 app.post('/sessions/connect', function(req, res){
 	console.log("ho ricevuto una richiesta")
 	var departure = req.body.departure.replace("+"," ")
@@ -82,7 +81,7 @@ app.get('/sessions/callback', function(req, res){
     var facilities = req.query.facilities;
     
     console.log("\nIl token oauth nella callback è: "+oauthRequestToken);
-    consumer(facilities).getOAuthAccessToken(oauthRequestToken, "", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
+    consumer(facilities).getOAuthAccessToken(oauthRequestToken,"", req.query.oauth_verifier, function(error, oauthAccessToken, oauthAccessTokenSecret, results) {
         if (error) {
             console.log(error)
             res.status(500).send("Error getting OAuth access token : " + (error) + "["+oauthAccessToken+"]"+ "["+oauthAccessTokenSecret+"]"+ "["+(results)+"]");

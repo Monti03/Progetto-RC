@@ -9,10 +9,10 @@ read transport
 function tran {
 	if (($transport == "car"))
 	then
-		curl http://localhost:8082/routing/car/partenza=:$partenza"&"arrivo=:$destinazione
+		curl http://localhost:8080/routing/car/partenza=:$partenza"&"arrivo=:$destinazione
 		
 	else	
-		curl http://localhost:8082/routing/public/partenza=:$partenza"&"arrivo=:$destinazione
+		curl http://localhost:8080/routing/public/partenza=:$partenza"&"arrivo=:$destinazione
 	fi
 }
 
