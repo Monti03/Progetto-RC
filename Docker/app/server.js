@@ -403,7 +403,7 @@ var firstHtml = "<html>\n"+
 "<body>\n"
 
 var secondHtml = "<br>\n"
-    +"<a id=\"Link\" target=\"_blank\">accedi su twitter</a>\n"
+    +"<a id=\"Link\" target=\"_blank\" onClick=\"getElementById('Link').style.display='none'\">accedi su twitter</a>\n"
     +"<div style=\"overflow-y: scroll; height:200px;\">"
 	+"<ul id=\"myList\"></ul>"
 	+"<script>"
